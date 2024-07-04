@@ -6,6 +6,7 @@ public class Bebidas {
 
     private TipoDeBebida tipoDeBebida;
     private Double volume;
+    private Double volumeTotalNaSecao;
 
 
     public Bebidas() {
@@ -14,6 +15,7 @@ public class Bebidas {
     public Bebidas(TipoDeBebida tipoDeBebida, Double volume) {
         this.tipoDeBebida = tipoDeBebida;
         this.volume = volume;
+        this.volumeTotalNaSecao = 0.0;
     }
 
     public TipoDeBebida getTipoDeBebida() {
@@ -24,12 +26,22 @@ public class Bebidas {
         return volume;
     }
 
+    public Double getVolumeTotalNaSecao() {
+        return volumeTotalNaSecao;
+    }
+
+    public void setVolumeTotalNaSecao(Double volumeTotalNaSecao) {
+        this.volumeTotalNaSecao = volumeTotalNaSecao;
+    }
 
     @Override
     public String toString() {
         return "Bebidas{" +
                 "tipoDeBebida=" + tipoDeBebida +
                 ", volume=" + volume +
+                ", volumeTotalNaSecao=" + volumeTotalNaSecao +
                 '}';
     }
+
+
 }

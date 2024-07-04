@@ -1,37 +1,47 @@
 package org.example.service;
 
+import org.example.enums.TipoDeMovimentacao;
+import org.example.model.Bebidas;
+import org.example.model.HistoricoDoDeposito;
 import org.example.model.Secao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class DepositoDeBebidasService {
 
     private List<Secao> secoes;
+    private List<HistoricoDoDeposito> historicoDoDepositos;
 
     private void setarId(Secao secao) {
-        int id = 0;
-        if (secoes.isEmpty()) {
-            id++;
-            secao.setId(id);
-        } else {
-            if (secoes.getLast() != null) {
-                id = secoes.getLast().getId();
-                id++;
-                secao.setId(id);
-            }
-        }
+        secao.setId(secoes.isEmpty() ? 1 : secoes.getLast().getId() + 1);
     }
 
     public void adicionandoNaSecao(Secao secao) {
-        if (this.secoes == null) {
-            this.secoes = new ArrayList<>();
-        }
-        capacidadeSecao(secao);
+        Stream.of(secao)
+                .filter(secao1 -> secao1.getBebidas().getVolume() <= secao1.capacidadeMaxima())
+                .map(secao1 -> {
+                    if (this.secoes == null) {
+                        this.secoes = new ArrayList<>();
+                        this.historicoDoDepositos = new ArrayList<>();
+                    }
+                    capacidadeSecao(secao);
+                    setarId(secao);
+                    entradaSaidaEstoque(secao);
+                    this.historicoDoDepositos.add(new HistoricoDoDeposito(secao.getId(), secao.getSecao(), secao.getTipoDeMovimentacao(), new Bebidas(secao.getBebidas().getTipoDeBebida(), secao.getBebidas().getVolume())));
+                    return this.secoes.add(secao);
+                })
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Não foi possível adicionar na seção pois o volume foi excedente!"));
     }
 
     public List<Secao> todasBebidas() {
         return this.secoes;
+    }
+
+    public List<HistoricoDoDeposito> historicoDoDeposito() {
+        return this.historicoDoDepositos;
     }
 
     private boolean existeSecao(String secao) {
@@ -73,12 +83,18 @@ public class DepositoDeBebidasService {
                 throw new RuntimeException("Não foi possível adicionar na seção pois o volume total foi excedente!");
             }
         }
+    }
 
-        if (secao.getBebidas().getVolume() <= secao.capacidadeMaxima()) {
-            setarId(secao);
-            this.secoes.add(secao);
+    private void entradaSaidaEstoque(Secao secao) {
+        double volumeTotal = volumeTotalNaSecao(secao.getSecao());
+        double volumeAtualizado;
+
+        if (secao.getTipoDeMovimentacao().equals(TipoDeMovimentacao.ENTRADA)) {
+            volumeAtualizado = volumeTotal + secao.getBebidas().getVolume();
         } else {
-            throw new RuntimeException("Não foi possível adicionar na seção pois o volume foi excedente!");
+            volumeAtualizado = volumeTotal - secao.getBebidas().getVolume();
         }
+
+        secao.getBebidas().setVolumeTotalNaSecao(volumeAtualizado);
     }
 }

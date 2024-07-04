@@ -14,12 +14,19 @@ public class Secao {
     private TipoDeMovimentacao tipoDeMovimentacao;
 
 
+    public Secao(String secao, TipoDeMovimentacao tipoDeMovimentacao, Bebidas bebidas) {
+        this.secao = secao;
+        this.bebidas = bebidas;
+        this.tipoDeMovimentacao = tipoDeMovimentacao;
+    }
+
     public Secao(Integer id, String secao, TipoDeMovimentacao tipoDeMovimentacao, Bebidas bebidas) {
         this.id = id;
         this.secao = secao;
         this.bebidas = bebidas;
         this.tipoDeMovimentacao = tipoDeMovimentacao;
     }
+
 
     public Integer getId() {
         return id;
