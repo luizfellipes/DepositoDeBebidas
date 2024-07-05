@@ -12,8 +12,9 @@ public class Main {
 
         DepositoDeBebidasService depositoDeBebidasService = new DepositoDeBebidasService();
 
-        depositoDeBebidasService.adicionandoNaSecao(new Secao("A", TipoDeMovimentacao.ENTRADA, new Bebidas(TipoDeBebida.ALCOLICO, -300.0)));
+        depositoDeBebidasService.adicionandoNaSecao(new Secao("A", TipoDeMovimentacao.ENTRADA, new Bebidas(TipoDeBebida.ALCOLICO, 200.0)));
         depositoDeBebidasService.adicionandoNaSecao(new Secao("A", TipoDeMovimentacao.SAIDA, new Bebidas(TipoDeBebida.ALCOLICO, 200.0)));
+        depositoDeBebidasService.adicionandoNaSecao(new Secao("B", TipoDeMovimentacao.ENTRADA, new Bebidas(TipoDeBebida.NAOALCOLICO, 200.0)));
         depositoDeBebidasService.todasBebidas().forEach(list -> System.out.println(list.toString()));
 
         System.out.println("*".repeat(10) + " Hitorico do deposito " + "*".repeat(10));

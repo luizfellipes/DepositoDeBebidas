@@ -14,9 +14,10 @@ public class Bebidas {
 
     public Bebidas(TipoDeBebida tipoDeBebida, Double volume) {
         this.tipoDeBebida = tipoDeBebida;
-        this.volume = volume;
+        this.volume = validaValoresNegativos(volume);
         this.volumeTotalNaSecao = 0.0;
     }
+
 
     public TipoDeBebida getTipoDeBebida() {
         return tipoDeBebida;
@@ -32,6 +33,14 @@ public class Bebidas {
 
     public void setVolumeTotalNaSecao(Double volumeTotalNaSecao) {
         this.volumeTotalNaSecao = volumeTotalNaSecao;
+    }
+
+    private Double validaValoresNegativos(Double volume) {
+        if (volume <= 0) {
+           throw new RuntimeException("Não é permitido volumes a baixo de 0");
+        } else {
+           return this.volume = volume;
+        }
     }
 
     @Override
