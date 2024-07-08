@@ -5,14 +5,14 @@ import org.example.model.Bebidas;
 import org.example.model.HistoricoDoDeposito;
 import org.example.model.Secao;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class DepositoDeBebidasService {
 
     private List<Secao> secoes;
     private List<HistoricoDoDeposito> historicoDoDepositos;
+    private static final Set<String> SECOES_PERMITIDAS = new HashSet<>(Arrays.asList("A", "B", "C", "D", "E"));
 
     private void setarId(Secao secao) {
         secao.setId(secoes.isEmpty() ? 1 : secoes.getLast().getId() + 1);
@@ -30,6 +30,7 @@ public class DepositoDeBebidasService {
                 .filter(secao1 -> secao1.getBebidas().getVolume() <= secao1.capacidadeMaxima())
                 .map(secao1 -> {
                     iniciaList();
+                    verificarSecaoPermitida(secao);
                     capacidadeSecao(secao);
                     volumeExcedente(secao);
                     setarId(secao);
@@ -55,38 +56,34 @@ public class DepositoDeBebidasService {
     }
 
     private boolean existeSecao(String secao) {
-        for (Secao secoes : secoes) {
-            if (secoes.getSecao().equalsIgnoreCase(secao)) {
-                return true;
-            }
+        return secoes.stream()
+                .anyMatch(secoes -> secoes.getSecao().equalsIgnoreCase(secao));
+    }
+
+    private void verificarSecaoPermitida(Secao secao) {
+        if (!SECOES_PERMITIDAS.contains(secao.getSecao().toUpperCase())) {
+            throw new RuntimeException("Seção não permitida! Use apenas seções de A a E.");
         }
-        return false;
     }
 
     private boolean tiposBebidasSaoIguais(Secao secao) {
-        for (Secao secoes : this.secoes) {
-            if (secoes.getSecao().equalsIgnoreCase(secao.getSecao())) {
-                return secoes.getBebidas().getTipoDeBebida().equals(secao.getBebidas().getTipoDeBebida());
-            }
-        }
-        return true;
+        return this.secoes.stream()
+                .filter(secoes -> secoes.getSecao().equalsIgnoreCase(secao.getSecao()))
+                .findFirst()
+                .map(secoes -> secoes.getBebidas().getTipoDeBebida().equals(secao.getBebidas().getTipoDeBebida()))
+                .orElse(true);
     }
 
     public double volumeTotalNaSecao(String secao) {
-        double volumeTotal = 0.0;
-        for (Secao secoes : this.secoes) {
-            if (secoes.getSecao().equalsIgnoreCase(secao)) {
-                volumeTotal += secoes.getBebidas().getVolume();
-            }
-        }
-        return volumeTotal;
+        return this.secoes.stream()
+                .filter(secoes -> secoes.getSecao().equalsIgnoreCase(secao))
+                .mapToDouble(secoes -> secoes.getBebidas().getVolume())
+                .sum();
     }
 
     private void capacidadeSecao(Secao secao) {
-        if (existeSecao(secao.getSecao())) {
-            if (!tiposBebidasSaoIguais(secao)) {
-                throw new RuntimeException("Não é permitido adicionar bebidas alcoólicas e não alcoólicas na mesma seção!");
-            }
+        if (existeSecao(secao.getSecao()) && !tiposBebidasSaoIguais(secao)) {
+            throw new RuntimeException("Não é permitido adicionar bebidas alcoólicas e não alcoólicas na mesma seção!");
         }
     }
 
@@ -98,13 +95,9 @@ public class DepositoDeBebidasService {
 
     private void entradaSaidaEstoque(Secao secao) {
         double volumeTotal = volumeTotalNaSecao(secao.getSecao());
-        double volumeAtualizado;
-
-        if (secao.getTipoDeMovimentacao().equals(TipoDeMovimentacao.ENTRADA)) {
-            volumeAtualizado = volumeTotal + secao.getBebidas().getVolume();
-        } else {
-            volumeAtualizado = volumeTotal - secao.getBebidas().getVolume();
-        }
+        double volumeAtualizado = secao.getTipoDeMovimentacao().equals(TipoDeMovimentacao.ENTRADA)
+                ? volumeTotal + secao.getBebidas().getVolume()
+                : volumeTotal - secao.getBebidas().getVolume();
 
         secao.getBebidas().setVolumeTotalNaSecao(volumeAtualizado);
     }
